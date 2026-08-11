@@ -1,0 +1,25 @@
+{
+  "period_start": "2026-06-01",
+  "period_end": "2026-06-30",
+  "estimated_organic_traffic": 3480,
+  "organic_keyword_count": 612,
+  "search_console": {"clicks": 1880, "impressions": 41300, "ctr": 0.045521, "average_position": 18.4},
+  "keywords": [
+    {"keyword": "second site services", "position": 10, "search_volume": 650, "keyword_difficulty": 24, "ranking_url": "https://secondsite.com/services", "clicks": 52, "impressions": 920, "ctr": 0.0565},
+    {"keyword": "regional widget partner", "position": 19, "search_volume": 420, "keyword_difficulty": 20, "ranking_url": "https://secondsite.com/partners", "clicks": 14, "impressions": 610, "ctr": 0.023},
+    {"keyword": "outdated service term", "position": 14, "search_volume": 170, "keyword_difficulty": 12, "ranking_url": "https://secondsite.com/archive", "clicks": 8, "impressions": 290, "ctr": 0.0276}
+  ],
+  "pages": [
+    {"url": "https://secondsite.com/services", "clicks": 620, "impressions": 11200, "ctr": 0.0554, "position": 12.5},
+    {"url": "https://secondsite.com/partners", "clicks": 280, "impressions": 7200, "ctr": 0.0389, "position": 18.8},
+    {"url": "https://secondsite.com/archive", "clicks": 180, "impressions": 4100, "ctr": 0.0439, "position": 14.2}
+  ],
+  "backlinks": {"total_backlinks": 4820, "referring_domains": 204, "new_referring_domains": 4, "lost_referring_domains": 3},
+  "sources": [
+    {"name": "openseo", "measurement_type": "estimated", "available": true},
+    {"name": "google_search_console", "measurement_type": "first_party", "available": true}
+  ],
+  "warnings": [],
+  "raw_metadata": {"fixture": "second-site/2026-06.json"}
+}
+

@@ -1,0 +1,25 @@
+{
+  "period_start": "2026-07-01",
+  "period_end": "2026-07-31",
+  "estimated_organic_traffic": 3310,
+  "organic_keyword_count": 598,
+  "search_console": {"clicks": 1762, "impressions": 42950, "ctr": 0.041024, "average_position": 19.1},
+  "keywords": [
+    {"keyword": "second site services", "position": 12, "search_volume": 650, "keyword_difficulty": 24, "ranking_url": "https://secondsite.com/services", "clicks": 41, "impressions": 1010, "ctr": 0.0406},
+    {"keyword": "regional widget partner", "position": 16, "search_volume": 420, "keyword_difficulty": 20, "ranking_url": "https://secondsite.com/partners", "clicks": 18, "impressions": 760, "ctr": 0.0237},
+    {"keyword": "local widget consultation", "position": 20, "search_volume": 320, "keyword_difficulty": 17, "ranking_url": "https://secondsite.com/consultation", "clicks": 10, "impressions": 520, "ctr": 0.0192}
+  ],
+  "pages": [
+    {"url": "https://secondsite.com/services", "clicks": 540, "impressions": 11900, "ctr": 0.0454, "position": 13.7},
+    {"url": "https://secondsite.com/partners", "clicks": 315, "impressions": 7900, "ctr": 0.0399, "position": 16.4},
+    {"url": "https://secondsite.com/consultation", "clicks": 105, "impressions": 2600, "ctr": 0.0404, "position": 20.2}
+  ],
+  "backlinks": {"total_backlinks": 4760, "referring_domains": 199, "new_referring_domains": 2, "lost_referring_domains": 7},
+  "sources": [
+    {"name": "openseo", "measurement_type": "estimated", "available": true},
+    {"name": "google_search_console", "measurement_type": "first_party", "available": true}
+  ],
+  "warnings": [],
+  "raw_metadata": {"fixture": "second-site/2026-07.json"}
+}
+

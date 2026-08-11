@@ -1,0 +1,39 @@
+sites:
+  - id: example
+    name: Example Company
+    domain: example.com
+    enabled: true
+    openseo_project_id: null
+    search:
+      country: US
+      language: en
+      device: desktop
+    reporting:
+      comparison_period: previous_month
+    target_keywords:
+      - commercial widget installation
+      - enterprise widgets
+    competitors:
+      - competitor-one.com
+      - competitor-two.com
+
+  - id: second-site
+    name: Second Website
+    domain: secondsite.com
+    enabled: true
+    openseo_project_id: null
+    search:
+      country: US
+      language: en
+      device: desktop
+    reporting:
+      comparison_period: previous_month
+
+opportunities:
+  high_priority_score: 70
+  medium_priority_score: 40
+  striking_distance_min: 11
+  striking_distance_max: 20
+  high_impression_threshold: 500
+  low_ctr_threshold: 0.025
+

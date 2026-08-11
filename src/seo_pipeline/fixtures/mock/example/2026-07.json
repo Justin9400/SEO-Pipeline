@@ -1,0 +1,30 @@
+{
+  "period_start": "2026-07-01",
+  "period_end": "2026-07-31",
+  "estimated_organic_traffic": 12340,
+  "organic_keyword_count": 1842,
+  "search_console": {"clicks": 6482, "impressions": 94110, "ctr": 0.068877, "average_position": 11.2},
+  "keywords": [
+    {"keyword": "commercial widget installation", "position": 12, "search_volume": 2400, "keyword_difficulty": 28, "cpc": 6.4, "intent": "commercial", "estimated_traffic": 140, "ranking_url": "https://example.com/services/widget-installation", "clicks": 81, "impressions": 3882, "ctr": 0.0209},
+    {"keyword": "enterprise widgets", "position": 5, "search_volume": 1800, "keyword_difficulty": 35, "cpc": 8.2, "intent": "commercial", "estimated_traffic": 280, "ranking_url": "https://example.com/enterprise", "clicks": 202, "impressions": 2470, "ctr": 0.0818},
+    {"keyword": "widget installation cost", "position": 11, "search_volume": 900, "keyword_difficulty": 22, "cpc": 4.8, "intent": "commercial", "estimated_traffic": 104, "ranking_url": "https://example.com/guides/widget-cost", "clicks": 70, "impressions": 1940, "ctr": 0.0361},
+    {"keyword": "eco friendly widgets", "position": 18, "search_volume": 720, "keyword_difficulty": 18, "cpc": 3.1, "intent": "informational", "estimated_traffic": 42, "ranking_url": "https://example.com/sustainability", "clicks": 27, "impressions": 1120, "ctr": 0.0241},
+    {"keyword": "new widget guide", "position": 25, "search_volume": 480, "keyword_difficulty": 15, "cpc": 1.8, "intent": "informational", "estimated_traffic": 12, "ranking_url": "https://example.com/guides/new-widgets", "clicks": 9, "impressions": 310, "ctr": 0.029},
+    {"keyword": "scalable widget platform", "position": 45, "search_volume": 1100, "keyword_difficulty": 42, "cpc": 9.1, "intent": "commercial", "estimated_traffic": 8, "ranking_url": "https://example.com/platform", "clicks": 4, "impressions": 160, "ctr": 0.025}
+  ],
+  "pages": [
+    {"url": "https://example.com/enterprise", "clicks": 1540, "impressions": 19600, "ctr": 0.0786, "position": 6.5},
+    {"url": "https://example.com/services/widget-installation", "clicks": 1160, "impressions": 16900, "ctr": 0.0686, "position": 11.7},
+    {"url": "https://example.com/guides/widget-cost", "clicks": 650, "impressions": 10500, "ctr": 0.0619, "position": 11.4},
+    {"url": "https://example.com/sustainability", "clicks": 430, "impressions": 8200, "ctr": 0.0524, "position": 18.1},
+    {"url": "https://example.com/guides/new-widgets", "clicks": 120, "impressions": 2100, "ctr": 0.0571, "position": 24.8}
+  ],
+  "backlinks": {"total_backlinks": 13490, "referring_domains": 462, "new_referring_domains": 21, "lost_referring_domains": 7, "top_linked_pages": [{"url": "https://example.com/research/widgets", "backlinks": 760}]},
+  "sources": [
+    {"name": "openseo", "measurement_type": "estimated", "available": true},
+    {"name": "google_search_console", "measurement_type": "first_party", "available": true}
+  ],
+  "warnings": [],
+  "raw_metadata": {"fixture": "example/2026-07.json"}
+}
+

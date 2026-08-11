@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ snapshot.site.name }} SEO Performance Report</title>
+  <style>{% include "report.css" %}</style>
+</head>
+<body>
+  <section class="cover">
+    <div class="eyebrow">SEO PERFORMANCE REPORT</div>
+    <h1>{{ snapshot.site.name }}</h1>
+    <div class="domain">{{ snapshot.site.domain }}</div>
+    <div class="cover-rule"></div>
+    <dl class="metadata">
+      <div><dt>Reporting period</dt><dd>{{ snapshot.reporting_period.start }} through {{ snapshot.reporting_period.end }}</dd></div>
+      <div><dt>Comparison period</dt><dd>{{ snapshot.reporting_period.previous_start }} through {{ snapshot.reporting_period.previous_end }}</dd></div>
+      <div><dt>Generated</dt><dd>{{ snapshot.reporting_period.generated_at.strftime('%Y-%m-%d') }}</dd></div>
+      <div><dt>Report / schema version</dt><dd>{{ snapshot.report_version }} / {{ snapshot.schema_version }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="page-break">
+    <div class="section-kicker">PERFORMANCE AT A GLANCE</div>
+    <h2>Executive summary</h2>
+    <p class="lead">{{ snapshot.analysis.executive_summary }}</p>
+    {% if snapshot.warnings %}
+    <div class="notice"><strong>Data availability:</strong> Some metrics were unavailable. Missing values remain labeled as such rather than treated as zero.</div>
+    {% endif %}
+
+    <h2>Core SEO metrics</h2>
+    <table class="metrics">
+      <thead><tr><th>Metric</th><th>Current</th><th>Previous</th><th>Change</th><th>Source</th></tr></thead>
+      <tbody>
+      {% for key in ['organic_clicks', 'organic_impressions', 'organic_ctr', 'average_position', 'estimated_organic_traffic', 'ranking_keywords', 'referring_domains'] %}
+        {% set metric = snapshot.metrics[key] %}
+        <tr>
+          <th>{{ metric_labels[key] }}</th>
+          <td>{{ metric|metric_value(metric.current) }}</td>
+          <td>{{ metric|metric_value(metric.previous) }}</td>
+          <td class="change {{ metric.direction }}">{{ metric|metric_change }}</td>
+          <td><span class="source-tag {{ metric.measurement_type }}">{{ metric.measurement_type|replace('_', ' ') }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="caption">Estimated organic traffic and ranking keyword totals are third-party estimates. Search Console metrics are first-party measurements when available.</p>
+  </section>
+
+  <section class="page-break">
+    <div class="section-kicker">SEARCH VISIBILITY</div>
+    <h2>Keyword visibility</h2>
+    <div class="stat-grid">
+      <div class="stat"><span>{{ snapshot.keyword_distribution.top_3 }}</span><small>Top 3</small></div>
+      <div class="stat"><span>{{ snapshot.keyword_distribution.top_10 }}</span><small>Positions 4-10</small></div>
+      <div class="stat"><span>{{ snapshot.keyword_distribution.positions_11_20 }}</span><small>Positions 11-20</small></div>
+      <div class="stat"><span>{{ snapshot.keyword_distribution.positions_21_50 }}</span><small>Positions 21-50</small></div>
+    </div>
+
+    <h2>Month-over-month keyword movement</h2>
+    <div class="movement-grid">
+      <div><strong>{{ snapshot.trends.new }}</strong><span>New</span></div>
+      <div><strong>{{ snapshot.trends.lost }}</strong><span>Lost</span></div>
+      <div><strong>{{ snapshot.trends.improving }}</strong><span>Improved</span></div>
+      <div><strong>{{ snapshot.trends.declining }}</strong><span>Declined</span></div>
+      <div><strong>{{ snapshot.trends.unchanged }}</strong><span>Unchanged</span></div>
+    </div>
+
+    <h2>Top search queries</h2>
+    <table>
+      <thead><tr><th>Query</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>CTR</th></tr></thead>
+      <tbody>
+      {% for row in snapshot.keywords[:12] %}
+        <tr><td>{{ row.keyword }}</td><td>{{ row.current_position|number(1) }}</td><td>{{ row.clicks|number }}</td><td>{{ row.impressions|number }}</td><td>{{ row.ctr|percent }}</td></tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">Not available</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <div class="section-kicker">ORGANIC LANDING PAGES</div>
+    <h2>Top organic landing pages</h2>
+    <table>
+      <thead><tr><th>Landing page</th><th>Clicks</th><th>Previous</th><th>Change</th><th>Impressions</th></tr></thead>
+      <tbody>
+      {% for row in snapshot.pages[:12] %}
+        <tr><td class="url">{{ row.url }}</td><td>{{ row.current_clicks|number }}</td><td>{{ row.previous_clicks|number }}</td><td>{{ row.clicks_change|number }}</td><td>{{ row.current_impressions|number }}</td></tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">Not available</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Backlink performance</h2>
+    <table class="metrics">
+      <thead><tr><th>Metric</th><th>Current</th><th>Previous</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><th>Total backlinks</th><td>{{ snapshot.backlinks.total_backlinks|metric_value(snapshot.backlinks.total_backlinks.current) }}</td><td>{{ snapshot.backlinks.total_backlinks|metric_value(snapshot.backlinks.total_backlinks.previous) }}</td><td>{{ snapshot.backlinks.total_backlinks|metric_change }}</td></tr>
+        <tr><th>Referring domains</th><td>{{ snapshot.backlinks.referring_domains|metric_value(snapshot.backlinks.referring_domains.current) }}</td><td>{{ snapshot.backlinks.referring_domains|metric_value(snapshot.backlinks.referring_domains.previous) }}</td><td>{{ snapshot.backlinks.referring_domains|metric_change }}</td></tr>
+        <tr><th>New referring domains</th><td>{{ snapshot.backlinks.new_referring_domains|number }}</td><td>Not available</td><td>Not available</td></tr>
+        <tr><th>Lost referring domains</th><td>{{ snapshot.backlinks.lost_referring_domains|number }}</td><td>Not available</td><td>Not available</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <div class="section-kicker">REPORT NOTES</div>
+    <h2>Performance summary</h2>
+    <p>{{ snapshot.analysis.executive_summary }}</p>
+    <p>This report describes observed performance. It does not assert why rankings changed and does not contain an internal implementation work plan.</p>
+
+    <h2>Data sources and metric definitions</h2>
+    <div class="definition"><strong>Google Search Console (first-party)</strong><p>Clicks, impressions, CTR, and average position measured for the connected property and reporting dates.</p></div>
+    <div class="definition"><strong>OpenSEO (estimated)</strong><p>Modeled visibility metrics such as estimated organic traffic, ranking keyword totals, and backlink counts. These are not substitutes for first-party traffic measurements.</p></div>
+
+    <h2>Data availability</h2>
+    {% if snapshot.warnings %}
+      <ul>{% for warning in snapshot.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+    {% else %}
+      <p>No collection warnings were recorded.</p>
+    {% endif %}
+  </section>
+</body>
+</html>

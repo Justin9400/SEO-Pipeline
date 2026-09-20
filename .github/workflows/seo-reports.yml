@@ -1,0 +1,128 @@
+name: Monthly SEO reports
+
+on:
+  schedule:
+    - cron: "17 10 5 * *"
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Use mock for a demonstration or openseo for real reports"
+        type: choice
+        options: [mock, openseo]
+        default: mock
+      period:
+        description: "Optional YYYY-MM; blank uses the last complete month"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: monthly-seo-reports
+  cancel-in-progress: false
+
+jobs:
+  report:
+    # Keep shared history confined to trusted default-branch runs.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PROVIDER: ${{ inputs.provider || 'openseo' }}
+      REPORT_PERIOD: ${{ inputs.period }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check required secrets
+        env:
+          OPENSEO_ACCESS_TOKEN: ${{ secrets.OPENSEO_ACCESS_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REPORT_ARCHIVE_PASSPHRASE: ${{ secrets.REPORT_ARCHIVE_PASSPHRASE }}
+        run: |
+          if [[ ${#REPORT_ARCHIVE_PASSPHRASE} -lt 32 ]]; then
+            echo "::error::Add REPORT_ARCHIVE_PASSPHRASE as a strong random secret of at least 32 characters."
+            exit 1
+          fi
+          if [[ "$PROVIDER" == openseo && ( -z "$OPENSEO_ACCESS_TOKEN" || -z "$OPENAI_API_KEY" ) ]]; then
+            echo "::error::Add OPENSEO_ACCESS_TOKEN and OPENAI_API_KEY in repository Actions secrets."
+            exit 1
+          fi
+
+      - name: Install pipeline and PDF dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core gnupg
+          python -m pip install .
+
+      - name: Restore previous snapshots
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT_ARCHIVE_PASSPHRASE: ${{ secrets.REPORT_ARCHIVE_PASSPHRASE }}
+        run: |
+          mkdir -p data/snapshots output
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          previous_run=$(jq -r --arg name "seo-state-$PROVIDER" --arg branch "$DEFAULT_BRANCH" \
+            '[.[].artifacts[] | select(.name == $name and .expired == false and .workflow_run.head_branch == $branch)] | sort_by(.created_at) | last | .workflow_run.id // empty' \
+            "$RUNNER_TEMP/artifacts.json")
+          if [[ -z "$previous_run" ]]; then
+            echo "::warning::No retained snapshot archive found. Starting without saved history; GSC backfill will be attempted."
+          else
+            gh run download "$previous_run" --repo "$GITHUB_REPOSITORY" --name "seo-state-$PROVIDER" --dir "$RUNNER_TEMP/previous-seo"
+            gpg --batch --yes --no-symkey-cache --pinentry-mode loopback --passphrase-fd 0 \
+              --output "$RUNNER_TEMP/previous-seo.tar.gz" --decrypt "$RUNNER_TEMP/previous-seo/seo-reports.tar.gz.gpg" <<< "$REPORT_ARCHIVE_PASSPHRASE"
+            tar -xzf "$RUNNER_TEMP/previous-seo.tar.gz" --no-same-owner data/snapshots
+          fi
+
+      - name: Generate reports
+        id: reports
+        env:
+          OPENSEO_ACCESS_TOKEN: ${{ secrets.OPENSEO_ACCESS_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.6' }}
+        run: |
+          args=(report --site all --provider "$PROVIDER")
+          if [[ -n "$REPORT_PERIOD" ]]; then
+            args+=(--period "$REPORT_PERIOD")
+          fi
+          seo-pipeline "${args[@]}"
+
+      - name: Encrypt reports and updated snapshots
+        id: archive
+        if: ${{ always() && (steps.reports.outcome == 'success' || steps.reports.outcome == 'failure') }}
+        env:
+          REPORT_ARCHIVE_PASSPHRASE: ${{ secrets.REPORT_ARCHIVE_PASSPHRASE }}
+          REPORT_OUTCOME: ${{ steps.reports.outcome }}
+        run: |
+          printf 'Run: %s\nResult: %s\nProvider: %s\n' "$GITHUB_RUN_ID" "$REPORT_OUTCOME" "$PROVIDER" > run-status.txt
+          tar -czf "$RUNNER_TEMP/seo-reports.tar.gz" data/snapshots output run-status.txt
+          gpg --batch --yes --no-symkey-cache --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 \
+            --output "$RUNNER_TEMP/seo-reports.tar.gz.gpg" "$RUNNER_TEMP/seo-reports.tar.gz" <<< "$REPORT_ARCHIVE_PASSPHRASE"
+
+      - name: Save encrypted reports and history
+        if: ${{ always() && steps.archive.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-state-${{ env.PROVIDER }}
+          path: ${{ runner.temp }}/seo-reports.tar.gz.gpg
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Remove unencrypted runner files
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/seo-reports.tar.gz" "$RUNNER_TEMP/previous-seo.tar.gz"
+          rm -rf data/snapshots output

@@ -162,20 +162,59 @@ to avoid distributing artifacts from a failed run.
 
 ## GitHub Actions / CI
 
-No schedule or deployment workflow is installed. After checkout, Python 3.12+
-setup, native PDF libraries, and environment secrets, invoke exactly:
+The workflow in [`.github/workflows/seo-reports.yml`](.github/workflows/seo-reports.yml)
+runs on the **5th of each month at 10:17 UTC**, reporting the last complete month.
+It also supports **Actions > Monthly SEO reports > Run workflow**. Manual runs
+default to `mock`; choose `openseo` for production. Leave `period` blank for the
+last complete month, or enter `YYYY-MM`. Run from the default branch; other
+branches are skipped to protect shared history. The workflow must be merged into
+the default branch before the schedule and manual button become available.
+
+Before production use, configure real sites/project IDs and add these repository
+Actions secrets under **Settings > Secrets and variables > Actions**:
+
+- `OPENSEO_ACCESS_TOKEN`: your OpenSEO API key.
+- `OPENAI_API_KEY`: your OpenAI key.
+- `REPORT_ARCHIVE_PASSPHRASE`: a strong random, single-line value of at least
+  32 characters. Keep a secure backup; this decrypts the saved reports/history.
+
+Optionally set the Actions **variable** `OPENAI_MODEL` (default `gpt-5.6`). Mock
+runs require only the archive passphrase and never call paid services.
+
+The job installs Python 3.12 and native PDF dependencies, restores the newest
+retained snapshot archive for the selected provider, then invokes the normal CLI:
 
 ```bash
 pip install .
 seo-pipeline report --site all --provider openseo
 ```
 
-Set `OPENAI_API_KEY`, `OPENSEO_ACCESS_TOKEN` (or `OPENSEO_API_KEY`), and optionally
-`OPENAI_MODEL`. Restore and persist `data/snapshots` using your chosen private CI
-artifact/storage mechanism and archive `output` as private reports. The pipeline
-does not depend on GitHub Actions. No website GitHub access, Cloudflare token, or
-deployment credentials are required. Schedule after Search Console's data lag
-(several days into the next month).
+Reports and the cumulative snapshots are bundled and AES256-encrypted with GPG
+before upload. Only `seo-reports.tar.gz.gpg` is uploaded, under `seo-state-openseo`
+or `seo-state-mock`; neither plaintext reports nor raw provider responses are
+uploaded. This protects report contents in a public repository. Artifacts expire
+after 90 days (or earlier if repository policy limits retention), so download
+backups. Every run carries earlier snapshots forward, including when a site fails.
+`run-status.txt` in the archive records whether the report command succeeded.
+Download artifacts from the workflow run, unzip the GitHub artifact, then decrypt:
+
+```bash
+gpg --output seo-reports.tar.gz --decrypt seo-reports.tar.gz.gpg
+tar -xzf seo-reports.tar.gz
+```
+
+GPG prompts for the archive passphrase. Extracted PDFs/Markdown/JSON are under
+`output/`; history is under `data/snapshots/`. Keep the passphrase unchanged across
+runs. Changing it without migrating prior archives causes restore to fail, rather
+than silently discarding history. If no retained archive exists, the workflow
+warns and starts without stored history; the CLI attempts GSC backfill.
+
+The workflow uses read-only repository/API permissions and serializes runs so two
+writers cannot overwrite history. It does not trigger on pushes or pull requests.
+GitHub may delay scheduled runs; public-repository schedules can be disabled after
+60 days without repository activity. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+The standalone CLI does not depend on GitHub Actions. No website GitHub access,
+Cloudflare token, or deployment credentials are required.
 
 Exit codes: **0** reports generated (possibly partial data or deterministic AI
 fallback); **1** at least one site failed; **2** invalid config/CLI/period. Other

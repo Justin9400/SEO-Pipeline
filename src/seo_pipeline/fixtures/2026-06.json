@@ -1,0 +1,23 @@
+{
+  "metrics": {"clicks": 8420, "impressions": 125100, "ctr": 0.0673061551, "average_position": 12.4, "estimated_organic_traffic": 11210, "ranking_keywords": 1701, "total_backlinks": 2890, "referring_domains": 448, "new_referring_domains": 21, "lost_referring_domains": 8},
+  "keywords": [
+    {"key": "commercial widget installation", "position": 15, "search_volume": 2400, "ranking_url": "https://example.com/services/installation"},
+    {"key": "widget maintenance", "position": 7, "search_volume": 1200, "ranking_url": "https://example.com/services/maintenance"},
+    {"key": "widget repair", "position": 25, "search_volume": 900, "ranking_url": "https://example.com/services/repair"},
+    {"key": "industrial widget guide", "position": 42, "search_volume": 600, "ranking_url": "https://example.com/guides/industrial"},
+    {"key": "example company", "position": 1, "search_volume": 300, "ranking_url": "https://example.com/"},
+    {"key": "legacy widget parts", "position": 18, "search_volume": 500, "ranking_url": "https://example.com/parts"},
+    {"key": "widget sizing", "position": 62, "search_volume": null, "ranking_url": "https://example.com/guides/sizing"}
+  ],
+  "queries": [
+    {"key": "commercial widget installation", "position": 15.2, "clicks": 60, "impressions": 3100, "ctr": 0.0193548387},
+    {"key": "widget maintenance", "position": 7.1, "clicks": 140, "impressions": 4400, "ctr": 0.0318181818},
+    {"key": "widget repair", "position": 8, "clicks": 48, "impressions": 4000, "ctr": 0.012},
+    {"key": "example company", "position": 1, "clicks": 280, "impressions": 500, "ctr": 0.56}
+  ],
+  "pages": [
+    {"key": "https://example.com/services/installation", "ranking_url": "https://example.com/services/installation", "clicks": 720, "impressions": 11000, "ctr": 0.0654545455, "position": 14},
+    {"key": "https://example.com/services/maintenance", "ranking_url": "https://example.com/services/maintenance", "clicks": 980, "impressions": 14000, "ctr": 0.07, "position": 7},
+    {"key": "https://example.com/", "ranking_url": "https://example.com/", "clicks": 3400, "impressions": 40000, "ctr": 0.085, "position": 3}
+  ]
+}

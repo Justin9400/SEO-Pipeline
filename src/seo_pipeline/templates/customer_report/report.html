@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SEO Performance | {{ s.site.name }}</title><style>{{ css|safe }}</style></head>
+<body>
+<div class="eyebrow">MONTHLY PERFORMANCE REPORT</div>
+<h1>SEO performance</h1>
+<div class="identity">{{ s.site.name }} <span>{{ s.site.domain }}</span></div>
+<p class="period">{{ s.reporting_period.start }} through {{ s.reporting_period.end }}<br>Compared with {{ s.reporting_period.previous_start }} through {{ s.reporting_period.previous_end }}</p>
+{% if s.collection.provider == 'mock' %}<p class="notice">DEMONSTRATION - Synthetic data. This report does not represent actual website performance.</p>{% endif %}
+<h2>Performance overview</h2><p>{{ summary }}</p>
+<table><thead><tr><th>Metric</th><th>Current</th><th>Previous</th><th>Change</th></tr></thead><tbody>
+{% for key in ['clicks','impressions','ctr','average_position','estimated_organic_traffic','ranking_keywords','referring_domains'] %}
+{% set m = s.metrics.get(key) %}<tr><td>{{ labels[key] }}{% if m and m.provenance.temporal_basis == 'point_in_time' %}<small>Observed {{ m.provenance.observed_at.date() }}</small>{% endif %}</td><td>{{ fmt(m.current if m else none, key == 'ctr') }}</td><td>{{ fmt(m.previous if m else none, key == 'ctr') }}</td><td>{{ change_text(key, m) }}</td></tr>
+{% endfor %}</tbody></table>
+<h2>Keyword visibility</h2><p class="muted">Observed keyword sample{% if s.collection.provider != 'mock' %}, collected {{ s.collection.observed_at.date() }}{% endif %}. Top 10 includes Top 3; other ranges do not overlap.</p>
+<table><thead><tr><th>Ranking range</th><th>Keywords</th></tr></thead><tbody>{% for name in ['Top 3','Top 10','11-20','21-50','51-100'] %}<tr><td>{{ name }}</td><td>{{ s.keyword_distribution[name] if s.keyword_distribution is not none else 'Not available' }}</td></tr>{% endfor %}</tbody></table>
+<h2>Month-over-month keyword movement</h2>
+<table><thead><tr><th>New</th><th>Lost</th><th>Improved</th><th>Declined</th></tr></thead><tbody><tr>{% for key in ['new','lost','improved','declined'] %}<td>{% if s.keyword_comparison_available %}{{ s.trends[key]|length }}{% else %}Not available{% endif %}</td>{% endfor %}</tr></tbody></table>
+<section class="new-page"><h2>Top organic landing pages</h2>
+<table><thead><tr><th>Landing page</th><th>Clicks</th><th>Click change</th><th>Impressions</th></tr></thead><tbody>
+{% for m in top_rows(s.pages) %}<tr><td class="url">{{ m.key }}</td><td>{{ fmt(m.current.clicks) }}</td><td>{{ fmt(m.clicks_change) }}</td><td>{{ fmt(m.current.impressions) }}</td></tr>{% else %}<tr><td colspan="4">Not available</td></tr>{% endfor %}</tbody></table>
+<h2>Top search queries</h2><table><thead><tr><th>Query</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>CTR</th></tr></thead><tbody>
+{% for m in top_rows(s.queries) %}<tr><td>{{ m.key }}</td><td>{{ fmt(m.current.position) }}</td><td>{{ fmt(m.current.clicks) }}</td><td>{{ fmt(m.current.impressions) }}</td><td>{{ fmt(m.current.ctr, true) }}</td></tr>{% else %}<tr><td colspan="5">Not available</td></tr>{% endfor %}</tbody></table>
+<h2>Backlink performance</h2><table><thead><tr><th>Metric</th><th>Current</th><th>Previous</th><th>Change</th></tr></thead><tbody>{% for key in ['total_backlinks','referring_domains','new_referring_domains','lost_referring_domains'] %}{% set m = s.metrics.get(key) %}<tr><td>{{ labels[key] }}{% if m and m.provenance.temporal_basis == 'point_in_time' %}<small>Observed {{ m.provenance.observed_at.date() }}</small>{% endif %}</td><td>{{ fmt(m.current if m else none) }}</td><td>{{ fmt(m.previous if m else none) }}</td><td>{{ change_text(key, m) }}</td></tr>{% endfor %}</tbody></table>
+<h2>Data sources &amp; metric definitions</h2>
+<p>Google Search Console supplies first-party clicks, impressions, click-through rate (CTR), and average search position. CTR is clicks divided by impressions. Lower position numbers are better. CTR changes are percentage points (pp).</p>
+<p>OpenSEO supplies estimated organic traffic and keyword visibility, plus observed backlink counts. Estimated traffic is not measured visits or Search Console clicks. Live estimates are labeled with their observation date and are not historical monthly totals. Missing values mean Not available, not zero.</p>
+<p>Search Console scope: {{ s.site.search.device }} devices; {{ s.site.search.gsc_country or 'all countries' }}; web search. Provider keyword market: {{ s.site.search.country }} / {{ s.site.search.language }}. Query totals can exclude anonymized searches. Changes compare periods of different calendar lengths without daily normalization.</p>
+<p>Keyword new/lost counts require complete comparable lists; bounded samples do not prove absence. {% if not s.collection.keywords_complete %}The keyword collection is unavailable or incomplete.{% endif %}</p>
+<h2>Summary</h2><p>{{ summary }}</p></section>
+</body></html>

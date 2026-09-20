@@ -1,0 +1,23 @@
+{
+  "metrics": {"clicks": 9464, "impressions": 137360, "ctr": 0.0688992429, "average_position": 11.2, "estimated_organic_traffic": 12340, "ranking_keywords": 1842, "total_backlinks": 3100, "referring_domains": 462, "new_referring_domains": 24, "lost_referring_domains": 10},
+  "keywords": [
+    {"key": "commercial widget installation", "position": 12, "search_volume": 2400, "ranking_url": "https://example.com/services/installation"},
+    {"key": "widget maintenance", "position": 12, "search_volume": 1200, "ranking_url": "https://example.com/services/maintenance"},
+    {"key": "widget repair", "position": 19, "search_volume": 900, "ranking_url": "https://example.com/services/repair"},
+    {"key": "industrial widget guide", "position": 32, "search_volume": 600, "ranking_url": "https://example.com/guides/industrial"},
+    {"key": "example company", "position": 1, "search_volume": 300, "ranking_url": "https://example.com/"},
+    {"key": "energy efficient widgets", "position": 9, "search_volume": 1800, "ranking_url": "https://example.com/efficient"},
+    {"key": "widget sizing", "position": 58, "search_volume": null, "ranking_url": "https://example.com/guides/sizing"}
+  ],
+  "queries": [
+    {"key": "commercial widget installation", "position": 12.1, "clicks": 81, "impressions": 3882, "ctr": 0.0208655332},
+    {"key": "widget maintenance", "position": 11.8, "clicks": 98, "impressions": 4600, "ctr": 0.0213043478},
+    {"key": "widget repair", "position": 7, "clicks": 50, "impressions": 5000, "ctr": 0.01},
+    {"key": "example company", "position": 1, "clicks": 330, "impressions": 580, "ctr": 0.5689655172}
+  ],
+  "pages": [
+    {"key": "https://example.com/services/installation", "ranking_url": "https://example.com/services/installation", "clicks": 930, "impressions": 13000, "ctr": 0.0715384615, "position": 11},
+    {"key": "https://example.com/services/maintenance", "ranking_url": "https://example.com/services/maintenance", "clicks": 740, "impressions": 15000, "ctr": 0.0493333333, "position": 12},
+    {"key": "https://example.com/", "ranking_url": "https://example.com/", "clicks": 3900, "impressions": 43000, "ctr": 0.0906976744, "position": 2.8}
+  ]
+}

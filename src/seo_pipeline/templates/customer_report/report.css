@@ -1,0 +1,11 @@
+@page { size: A4; margin: 17mm 17mm 19mm; @bottom-left { content: "SEO PERFORMANCE  |  MONTHLY REVIEW"; font-size: 8pt; color: #52616b; } @bottom-right { content: counter(page) " / " counter(pages); font-size: 8pt; color: #52616b; } }
+body { font-family: sans-serif; color: #23323b; font-size: 9pt; line-height: 1.4; }
+.eyebrow { color: #276a71; font-size: 8pt; letter-spacing: 2px; font-weight: bold; }
+h1 { font-size: 32pt; line-height: 1.05; margin: 10px 0 14px; letter-spacing: -1px; color: #16363d; }
+.identity { font-size: 14pt; font-weight: bold; }.identity span { font-size: 10pt; font-weight: normal; margin-left: 14px; color: #52616b; }
+.period { color: #52616b; margin: 8px 0 16px; }.notice { padding: 8px 12px; background: #eef4f3; border-left: 3px solid #276a71; }
+h2 { font-size: 13pt; color: #16363d; margin: 16px 0 7px; break-after: avoid; }
+p { margin: 5px 0 8px; }table { border-collapse: collapse; width: 100%; font-size: 8.5pt; margin: 7px 0 12px; table-layout: fixed; }
+th { background: #16363d; color: white; text-align: left; font-weight: bold; padding: 6px 8px; }td { padding: 5px 8px; border-bottom: 1px solid #dbe3e4; vertical-align: top; overflow-wrap: anywhere; }
+th:first-child { width: 36%; }tr:nth-child(even) td { background: #f4f7f7; }tr { break-inside: avoid; }thead { display: table-header-group; }
+small { display: block; font-size: 7pt; color: #52616b; }.muted { font-size: 8pt; color: #52616b; }.new-page { break-before: page; }.url { font-size: 8pt; }

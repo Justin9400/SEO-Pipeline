@@ -175,11 +175,11 @@ Actions secrets under **Settings > Secrets and variables > Actions**:
 
 - `OPENSEO_ACCESS_TOKEN`: your OpenSEO API key.
 - `OPENAI_API_KEY`: your OpenAI key.
-- `REPORT_ARCHIVE_PASSPHRASE`: a strong random, single-line value of at least
-  32 characters. Keep a secure backup; this decrypts the saved reports/history.
+- `REPORT_ARCHIVE_PASSPHRASE`: keep the existing strong random value (at least
+  32 characters) for private snapshot history. It is not used for PDF downloads.
 
 Optionally set the Actions **variable** `OPENAI_MODEL` (default `gpt-5.6`). Mock
-runs require only the archive passphrase and never call paid services.
+runs require only the history passphrase and never call paid services.
 
 The job installs Python 3.12 and native PDF dependencies, restores the newest
 retained snapshot archive for the selected provider, then invokes the normal CLI:
@@ -189,25 +189,26 @@ pip install .
 seo-pipeline report --site all --provider openseo
 ```
 
-Reports and the cumulative snapshots are bundled and AES256-encrypted with GPG
-before upload. Only `seo-reports.tar.gz.gpg` is uploaded, under `seo-state-openseo`
-or `seo-state-mock`; neither plaintext reports nor raw provider responses are
-uploaded. This protects report contents in a public repository. Artifacts expire
-after 90 days (or earlier if repository policy limits retention), so download
-backups. Every run carries earlier snapshots forward, including when a site fails.
-`run-status.txt` in the archive records whether the report command succeeded.
-Download artifacts from the workflow run, unzip the GitHub artifact, then decrypt:
+Download **seo-reports-openseo** (or **seo-reports-mock**) from the workflow
+run's **Artifacts** section. GitHub downloads it as a normal ZIP containing the
+PDF files, organized by provider/domain/month. Unzip it and open the PDFs directly;
+there is no password, GPG file, or nested tar archive.
 
-```bash
-gpg --output seo-reports.tar.gz --decrypt seo-reports.tar.gz.gpg
-tar -xzf seo-reports.tar.gz
-```
+Private snapshot history is uploaded separately as **seo-state-openseo** or
+**seo-state-mock**. Snapshot JSON includes internal evidence/analysis, so this
+separate archive remains encrypted and is restored automatically on subsequent
+runs using `REPORT_ARCHIVE_PASSPHRASE`. Keep that secret unchanged. You do not need
+to download or decrypt the history artifact to open the PDFs.
 
-GPG prompts for the archive passphrase. Extracted PDFs/Markdown/JSON are under
-`output/`; history is under `data/snapshots/`. Keep the passphrase unchanged across
-runs. Changing it without migrating prior archives causes restore to fail, rather
-than silently discarding history. If no retained archive exists, the workflow
-warns and starts without stored history; the CLI attempts GSC backfill.
+The PDF artifact contains only PDFs; no Markdown, JSON, or raw provider responses
+are included. The history archive contains only snapshots and retains the old
+encrypted filename for compatibility with earlier runs. Existing encrypted
+archives remain readable by the workflow; old PDF downloads are not retroactively
+converted. Rerun the workflow to get the new plain PDF ZIP.
+
+Artifacts expire after 90 days (or earlier if repository policy limits retention),
+so download backups. Successful sites' PDFs and collected snapshots are still
+uploaded when another site fails; check the run result.
 
 The workflow uses read-only repository/API permissions and serializes runs so two
 writers cannot overwrite history. It does not trigger on pushes or pull requests.

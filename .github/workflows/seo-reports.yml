@@ -52,7 +52,7 @@ jobs:
           REPORT_ARCHIVE_PASSPHRASE: ${{ secrets.REPORT_ARCHIVE_PASSPHRASE }}
         run: |
           if [[ ${#REPORT_ARCHIVE_PASSPHRASE} -lt 32 ]]; then
-            echo "::error::Add REPORT_ARCHIVE_PASSPHRASE as a strong random secret of at least 32 characters."
+            echo "::error::Set REPORT_ARCHIVE_PASSPHRASE (at least 32 characters) for private snapshot history. PDF downloads do not use it."
             exit 1
           fi
           if [[ "$PROVIDER" == openseo && ( -z "$OPENSEO_ACCESS_TOKEN" || -z "$OPENAI_API_KEY" ) ]]; then
@@ -98,20 +98,29 @@ jobs:
           fi
           seo-pipeline "${args[@]}"
 
-      - name: Encrypt reports and updated snapshots
+      - name: Save PDF reports
+        if: ${{ always() && (steps.reports.outcome == 'success' || steps.reports.outcome == 'failure') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-reports-${{ env.PROVIDER }}
+          path: output/**/*.pdf
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Encrypt private snapshot history
         id: archive
         if: ${{ always() && (steps.reports.outcome == 'success' || steps.reports.outcome == 'failure') }}
         env:
           REPORT_ARCHIVE_PASSPHRASE: ${{ secrets.REPORT_ARCHIVE_PASSPHRASE }}
-          REPORT_OUTCOME: ${{ steps.reports.outcome }}
         run: |
-          printf 'Run: %s\nResult: %s\nProvider: %s\n' "$GITHUB_RUN_ID" "$REPORT_OUTCOME" "$PROVIDER" > run-status.txt
-          tar -czf "$RUNNER_TEMP/seo-reports.tar.gz" data/snapshots output run-status.txt
+          # Preserve the existing archive filename for restore compatibility.
+          # Only private snapshot data goes into this archive; PDFs are uploaded above.
+          tar -czf "$RUNNER_TEMP/seo-history.tar.gz" data/snapshots
           gpg --batch --yes --no-symkey-cache --pinentry-mode loopback --passphrase-fd 0 \
             --symmetric --cipher-algo AES256 \
-            --output "$RUNNER_TEMP/seo-reports.tar.gz.gpg" "$RUNNER_TEMP/seo-reports.tar.gz" <<< "$REPORT_ARCHIVE_PASSPHRASE"
+            --output "$RUNNER_TEMP/seo-reports.tar.gz.gpg" "$RUNNER_TEMP/seo-history.tar.gz" <<< "$REPORT_ARCHIVE_PASSPHRASE"
 
-      - name: Save encrypted reports and history
+      - name: Save encrypted snapshot history
         if: ${{ always() && steps.archive.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
@@ -121,8 +130,8 @@ jobs:
           compression-level: 0
           if-no-files-found: error
 
-      - name: Remove unencrypted runner files
+      - name: Clean up runner files
         if: always()
         run: |
-          rm -f "$RUNNER_TEMP/seo-reports.tar.gz" "$RUNNER_TEMP/previous-seo.tar.gz"
+          rm -f "$RUNNER_TEMP/seo-history.tar.gz" "$RUNNER_TEMP/previous-seo.tar.gz"
           rm -rf data/snapshots output

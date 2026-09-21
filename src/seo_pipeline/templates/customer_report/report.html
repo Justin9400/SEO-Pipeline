@@ -27,4 +27,21 @@
 <p>Search Console scope: {{ s.site.search.device }} devices; {{ s.site.search.gsc_country or 'all countries' }}; web search. Provider keyword market: {{ s.site.search.country }} / {{ s.site.search.language }}. Query totals can exclude anonymized searches. Changes compare periods of different calendar lengths without daily normalization.</p>
 <p>Keyword new/lost counts require complete comparable lists; bounded samples do not prove absence. {% if not s.collection.keywords_complete %}The keyword collection is unavailable or incomplete.{% endif %}</p>
 <h2>Summary</h2><p>{{ summary }}</p></section>
+<section class="new-page"><h2>SEO improvement recommendations</h2>
+<p>Prioritized from this report's collected search and traffic evidence. These are suggested investigations and improvements, not confirmed technical defects or guaranteed ranking gains.</p>
+{% for c in recommendations %}
+{% set e = c.evidence %}{% set row = e.current or e.previous %}{% set action = seo_actions[c.opportunity_type] %}
+<div class="recommendation">
+<h3>{{ loop.index }}. {{ action[0] }}</h3>
+<p><strong>{{ c.priority|title }} priority</strong> | {{ e.key }}</p>
+{% if row.ranking_url %}<p class="url">Ranking page: {{ row.ranking_url }}</p>{% endif %}
+<p><strong>Finding:</strong> {{ c.reason }}</p>
+<p class="muted">Source: {{ row.source }}. {% if not e.current %}Last available observation; current data is unavailable. {% endif %}Position: {{ fmt(row.position) }}; previous position: {{ fmt(e.previous.position if e.previous else none) }}. Clicks: {{ fmt(row.clicks) }}; click change: {{ fmt(e.clicks_change) }}. Impressions: {{ fmt(row.impressions) }}; CTR: {{ fmt(row.ctr, true) }}.</p>
+<p><strong>Recommended action:</strong> {{ action[1] }}</p>
+</div>
+{% else %}
+<p>No supported improvement candidates were identified in the available data. This does not establish that the site has no SEO issues. Check Search Console coverage and collect comparable data before choosing page-specific changes.</p>
+{% endfor %}
+<p class="muted">Review results in the next reporting period. Search performance alone cannot establish why a ranking changed; verify suspected issues before editing the site.</p>
+</section>
 </body></html>

@@ -146,7 +146,8 @@ data/raw/<site-id>/<collection-date>/<request-hash>.json
   evidence, scores, analysis status and limitations. Null means unavailable.
 - **`seo-performance-report.pdf`**: customer-facing month-over-month metrics,
   keyword visibility/movement, landing pages, queries, backlinks and definitions.
-  No prompts, debugging output, speculative recommendations, or internal work plan.
+  Includes evidence-based improvement recommendations; no prompts, debugging output,
+  or private model analysis.
 - **`seo-opportunities.md`**: private semantic Markdown with dates/sources,
   directional trends, gains/losses and structured scored candidates. It can be
   pasted into an LLM as evidence, with explicit separation of provider strings
@@ -192,10 +193,16 @@ pip install .
 seo-pipeline report --site all --provider openseo
 ```
 
-Download **seo-reports-openseo** (or **seo-reports-mock**) from the workflow
-run's **Artifacts** section. GitHub downloads it as a normal ZIP containing the
-PDF files, organized by provider/domain/month. Unzip it and open the PDFs directly;
-there is no password, GPG file, or nested tar archive.
+Download **seo-performance-report.pdf** from the workflow run's **Artifacts**
+section. It downloads directly as a PDF, with no ZIP extraction or password.
+The workflow uses `actions/upload-artifact@v7` with `archive: false`, which requires
+exactly one PDF per upload. The configuration contains only Edwardscapes; if more
+sites are added later, upload each site's PDF separately.
+
+The PDF includes up to five prioritized SEO improvement recommendations based on
+that run's collected evidence, with the affected keyword/page, source metrics,
+and concrete next steps. Recommendations remain available without OpenAI analysis.
+When evidence is insufficient, the report says so instead of inventing findings.
 
 Private snapshot history is uploaded separately as **seo-state-openseo** or
 **seo-state-mock**. Snapshot JSON includes internal evidence/analysis, so this
@@ -207,11 +214,11 @@ The PDF artifact contains only PDFs; no Markdown, JSON, or raw provider response
 are included. The history archive contains only snapshots and retains the old
 encrypted filename for compatibility with earlier runs. Existing encrypted
 archives remain readable by the workflow; old PDF downloads are not retroactively
-converted. Rerun the workflow to get the new plain PDF ZIP.
+converted. Rerun the workflow to get the new direct PDF download.
 
 Artifacts expire after 90 days (or earlier if repository policy limits retention),
-so download backups. Successful sites' PDFs and collected snapshots are still
-uploaded when another site fails; check the run result.
+so download backups. The available PDF and collected snapshots are still uploaded if report generation
+partially fails; check the run result.
 
 The workflow uses read-only repository/API permissions and serializes runs so two
 writers cannot overwrite history. It does not trigger on pushes or pull requests.

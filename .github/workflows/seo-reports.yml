@@ -100,10 +100,11 @@ jobs:
 
       - name: Save PDF reports
         if: ${{ always() && (steps.reports.outcome == 'success' || steps.reports.outcome == 'failure') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: seo-reports-${{ env.PROVIDER }}
+          # Direct uploads require one file: config/sites.yaml contains only Edwardscapes.
           path: output/**/*.pdf
+          archive: false
           retention-days: 90
           if-no-files-found: warn
 

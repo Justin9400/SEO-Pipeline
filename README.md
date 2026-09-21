@@ -40,7 +40,7 @@ and embeds real text; it does not require JavaScript or fetch remote resources.
 From the repository root:
 
 ```bash
-seo-pipeline report --site example --provider mock --period 2026-07
+seo-pipeline report --site edwardscapes --provider mock --period 2026-07
 seo-pipeline report --site all --provider mock --period 2026-07
 ```
 
@@ -56,7 +56,10 @@ a demonstration, not live performance for the configured domains.
 
 ## Configure sites
 
-Edit `config/sites.yaml`. IDs and domains must be unique. Disabled sites are skipped.
+The active `config/sites.yaml` contains only Edwardscapes (`edwardscapes.com`),
+linked to its named OpenSEO project. Placeholder sites live only in test fixtures.
+
+Edit `config/sites.yaml` to change the monitored sites. IDs and domains must be unique. Disabled sites are skipped.
 Domains must be hostnames without a scheme or path. Unknown configuration fields
 are rejected, including credentials and website repository/deployment settings.
 

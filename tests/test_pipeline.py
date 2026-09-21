@@ -43,7 +43,9 @@ def pair():
 
 def test_configuration():
     config = load_config(Path("config/sites.yaml"))
-    assert len(config.sites) == 2
+    assert len(config.sites) == 1
+    assert config.sites[0].id == "edwardscapes"
+    assert config.sites[0].domain == "edwardscapes.com"
     assert config.sites[0].search.location_code == 2840
 
 
@@ -229,6 +231,8 @@ def test_pdf_real_text(tmp_path, pair):
 def test_mock_multisite(tmp_path):
     args = [
         "report",
+        "--config",
+        "tests/fixtures/sites.yaml",
         "--site",
         "all",
         "--provider",
@@ -270,6 +274,8 @@ def test_site_isolation(tmp_path, monkeypatch):
         main(
             [
                 "report",
+                "--config",
+                "tests/fixtures/sites.yaml",
                 "--dry-run",
                 "--period",
                 "2026-07",
@@ -298,6 +304,8 @@ def test_render_failure_preserves_data(tmp_path, monkeypatch):
         main(
             [
                 "report",
+                "--config",
+                "tests/fixtures/sites.yaml",
                 "--site",
                 "example",
                 "--provider",

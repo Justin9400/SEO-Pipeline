@@ -171,7 +171,7 @@ runs on the **5th of each month at 10:17 UTC**, reporting the last complete mont
 It also supports **Actions > Monthly SEO reports > Run workflow**. Manual runs
 default to `mock`; choose `openseo` for production. Leave `period` blank for the
 last complete month, or enter `YYYY-MM`. Run from the default branch; other
-branches are skipped to protect shared history. The workflow must be merged into
+branches are skipped to keep scheduled and manual runs consistent. The workflow must be merged into
 the default branch before the schedule and manual button become available.
 
 Before production use, configure real sites/project IDs and add these repository
@@ -179,14 +179,11 @@ Actions secrets under **Settings > Secrets and variables > Actions**:
 
 - `OPENSEO_ACCESS_TOKEN`: your OpenSEO API key.
 - `OPENAI_API_KEY`: your OpenAI key.
-- `REPORT_ARCHIVE_PASSPHRASE`: keep the existing strong random value (at least
-  32 characters) for private snapshot history. It is not used for PDF downloads.
 
 Optionally set the Actions **variable** `OPENAI_MODEL` (default `gpt-5.6`). Mock
-runs require only the history passphrase and never call paid services.
+runs require no secrets and never call paid services.
 
-The job installs Python 3.12 and native PDF dependencies, restores the newest
-retained snapshot archive for the selected provider, then invokes the normal CLI:
+The job installs Python 3.12 and native PDF dependencies, then invokes the normal CLI:
 
 ```bash
 pip install .
@@ -204,24 +201,21 @@ that run's collected evidence, with the affected keyword/page, source metrics,
 and concrete next steps. Recommendations remain available without OpenAI analysis.
 When evidence is insufficient, the report says so instead of inventing findings.
 
-Private snapshot history is uploaded separately as **seo-state-openseo** or
-**seo-state-mock**. Snapshot JSON includes internal evidence/analysis, so this
-separate archive remains encrypted and is restored automatically on subsequent
-runs using `REPORT_ARCHIVE_PASSPHRASE`. Keep that secret unchanged. You do not need
-to download or decrypt the history artifact to open the PDFs.
+Only the PDF is uploaded. Snapshot JSON, Markdown, and raw provider responses
+remain on the temporary runner and are not uploaded as artifacts. Each Actions
+run starts without saved snapshot history. The pipeline attempts to retrieve the
+previous month's Search Console data for comparisons; historical ranking and
+backlink comparisons are unavailable without retained snapshots. Local CLI runs
+can still keep history in their configured data directory.
 
-The PDF artifact contains only PDFs; no Markdown, JSON, or raw provider responses
-are included. The history archive contains only snapshots and retains the old
-encrypted filename for compatibility with earlier runs. Existing encrypted
-archives remain readable by the workflow; old PDF downloads are not retroactively
-converted. Rerun the workflow to get the new direct PDF download.
+Existing artifacts from older runs are unchanged. Rerun the workflow to get the
+current PDF-only output.
 
 Artifacts expire after 90 days (or earlier if repository policy limits retention),
-so download backups. The available PDF and collected snapshots are still uploaded if report generation
+so download backups. Any available PDF is still uploaded if report generation
 partially fails; check the run result.
 
-The workflow uses read-only repository/API permissions and serializes runs so two
-writers cannot overwrite history. It does not trigger on pushes or pull requests.
+The workflow uses read-only repository permissions and serializes report runs. It does not trigger on pushes or pull requests.
 GitHub may delay scheduled runs; public-repository schedules can be disabled after
 60 days without repository activity. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
 The standalone CLI does not depend on GitHub Actions. No website GitHub access,

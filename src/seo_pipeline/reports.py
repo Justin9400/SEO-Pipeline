@@ -20,6 +20,41 @@ LABELS = {
     "lost_referring_domains": "Lost referring domains",
 }
 
+SEO_ACTIONS = {
+    "STRIKING_DISTANCE": (
+        "Improve near-page-one rankings",
+        "Compare the ranking page with the current top results for this query. Fill relevant content gaps and add useful internal links from related pages.",
+    ),
+    "LOW_CTR": (
+        "Improve search-result click-through",
+        "Review the actual search result and query intent. Test a clearer, accurate page title and meta description; compare CTR after enough new impressions accumulate.",
+    ),
+    "DECLINED": (
+        "Investigate declining rankings",
+        "Check the affected page's indexing, recent edits, and competing results. Correct any verified issues and update content where it no longer answers the query.",
+    ),
+    "LOST": (
+        "Investigate lost keyword visibility",
+        "Verify the ranking URL in Search Console and check indexing, redirects, and canonical tags before deciding whether content needs restoring or updating.",
+    ),
+    "PAGE_LOSS": (
+        "Recover declining page traffic",
+        "Break down this page's Search Console queries to distinguish lower impressions from lower CTR. Check indexing and recent page changes, then prioritize the confirmed cause.",
+    ),
+    "PAGE_GAIN": (
+        "Build on a growing landing page",
+        "Identify the queries driving this page's gains. Expand relevant supporting content and link it to this page where useful to visitors.",
+    ),
+    "IMPROVED": (
+        "Build on improving rankings",
+        "Review the queries and content sections associated with the improvement. Strengthen relevant coverage and internal links, then monitor whether gains persist.",
+    ),
+    "NEW": (
+        "Develop newly observed visibility",
+        "Confirm the ranking page matches the query's intent. Add useful supporting detail and relevant internal links, then monitor clicks and position.",
+    ),
+}
+
 
 def fmt(value: float | None, percent: bool = False) -> str:
     if value is None:
@@ -65,6 +100,8 @@ def customer_html(snapshot: Snapshot) -> str:
         s=snapshot,
         labels=LABELS,
         summary=summary(snapshot),
+        recommendations=sorted(snapshot.candidates, key=lambda c: (-c.score, c.id))[:5],
+        seo_actions=SEO_ACTIONS,
         css=folder.joinpath("report.css").read_text(encoding="utf-8"),
     )
 

@@ -225,7 +225,10 @@ def test_pdf_real_text(tmp_path, pair):
         text = "\n".join(p.get_text() for p in doc)
         assert "SEO performance" in text
         assert "Data sources" in text
-        assert 2 <= len(doc) <= 4
+        assert "SEO improvement recommendations" in text
+        assert "Recommended action:" in text
+        assert pair[0].candidates[0].evidence.key in text
+        assert 3 <= len(doc) <= 6
 
 
 def test_mock_multisite(tmp_path):
@@ -354,3 +357,19 @@ def test_bad_config_cli(tmp_path):
     config = tmp_path / "bad.yaml"
     config.write_text("sites: [invalid")
     assert main(["report", "--config", str(config)]) == 2
+
+
+def test_customer_recommendations_without_model(pair):
+    current, _ = pair
+    assert current.analysis is None
+    html = customer_html(current)
+    assert "SEO improvement recommendations" in html
+    assert html.count("Recommended action:") == 5
+    candidate = current.candidates[0]
+    assert candidate.reason in html
+    candidate.evidence.key = "<script>unsafe</script>"
+    html = customer_html(current)
+    assert "&lt;script&gt;unsafe&lt;/script&gt;" in html
+    assert "<script>" not in html
+    current.candidates = []
+    assert "No supported improvement candidates" in customer_html(current)

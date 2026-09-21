@@ -1,0 +1,27 @@
+sites:
+  - id: example
+    name: Example Company
+    domain: example.com
+    enabled: true
+    search:
+      country: US
+      language: en
+      device: desktop
+      location_code: 2840
+    reporting:
+      comparison_period: previous_month
+    target_keywords: [commercial widget installation, widget maintenance]
+    competitors: [example.net]
+    # Set the project ID from your OpenSEO workspace before production use.
+    openseo_project_id: null
+  - id: second-site
+    name: Second Website
+    domain: secondsite.com
+    enabled: true
+scoring:
+  min_impressions: 500
+  min_volume: 100
+  # Optional operator heuristic, not a universal CTR benchmark.
+  low_ctr: 0.02
+  high: 60
+  medium: 30

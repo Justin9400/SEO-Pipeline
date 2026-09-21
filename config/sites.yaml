@@ -1,7 +1,7 @@
 sites:
-  - id: example
-    name: Example Company
-    domain: example.com
+  - id: edwardscapes
+    name: Edwardscapes
+    domain: edwardscapes.com
     enabled: true
     search:
       country: US
@@ -10,14 +10,7 @@ sites:
       location_code: 2840
     reporting:
       comparison_period: previous_month
-    target_keywords: [commercial widget installation, widget maintenance]
-    competitors: [example.net]
-    # Set the project ID from your OpenSEO workspace before production use.
-    openseo_project_id: null
-  - id: second-site
-    name: Second Website
-    domain: secondsite.com
-    enabled: true
+    openseo_project_id: 32fb1f2f-8ccb-4857-8538-2741e25221bd
 scoring:
   min_impressions: 500
   min_volume: 100

@@ -29,6 +29,8 @@ def test_openai_failure_keeps_factual_outputs(tmp_path, monkeypatch, capsys):
         cli.main(
             [
                 "report",
+                "--config",
+                "tests/fixtures/sites.yaml",
                 "--site",
                 "example",
                 "--period",

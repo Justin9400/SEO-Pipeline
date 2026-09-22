@@ -263,3 +263,27 @@ mapping/cache/pagination and structured OpenAI validation.
   fields, numeric ranges, enabled site selection, and `YYYY-MM` formatting.
 
 There are no website modification or deployment capabilities in this package.
+
+### Automated technical site audit
+
+Edwardscapes production runs now start a fresh OpenSEO crawl and include its
+technical findings and suggested fixes in the same downloadable PDF. No manual
+JSON upload is required. Configure the site in `config/sites.yaml`:
+
+```yaml
+audit:
+  enabled: true
+  max_pages: 100
+  timeout_seconds: 900
+```
+
+The pipeline waits up to 15 minutes, polls the exact new audit ID, and includes
+up to 200 issue details ordered by severity. The PDF states crawl and issue limits,
+audit date, affected URLs, evidence, and how to fix each finding. This is a current
+crawl rather than historical monthly data. Lighthouse is disabled. Mock runs and
+historical backfills never start audits. Set `enabled: false` to opt out.
+
+OpenSEO audit capacity/account limits apply. Each production rerun starts a new
+audit; the pipeline does not automatically delete old audits. A failed or timed-out
+audit is clearly marked in the PDF and causes a nonzero exit status, while the
+workflow still uploads the available PDF. No archive passphrase is required.

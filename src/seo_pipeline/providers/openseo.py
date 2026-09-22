@@ -24,6 +24,9 @@ from . import ProviderError
 
 ENDPOINT = "https://app.openseo.so/mcp"
 ALLOWED = {
+    "run_site_audit",
+    "get_audit_status",
+    "get_audit_issues",
     "get_domain_overview",
     "get_ranked_keywords",
     "get_search_console_performance",
@@ -74,7 +77,7 @@ class MCPReader:
     async def call(self, name: str, args: dict) -> dict:
         if name not in ALLOWED or name not in self.schemas:
             raise ProviderError(
-                f"Required read tool {name} is unavailable; verify OpenSEO account scopes/server version"
+                f"Required tool {name} is unavailable; verify OpenSEO account scopes/server version"
             )
         try:
             jsonschema.validate(args, self.schemas[name])
@@ -86,9 +89,14 @@ class MCPReader:
             json.dumps([name, args], sort_keys=True).encode()
         ).hexdigest()
         path = self.cache / f"{digest}.json"
-        if digest in self.memory:
+        cacheable = name not in {
+            "run_site_audit",
+            "get_audit_status",
+            "get_audit_issues",
+        }
+        if cacheable and digest in self.memory:
             return self.memory[digest]
-        if path.exists():
+        if cacheable and path.exists():
             cached = json.loads(path.read_text(encoding="utf-8"))
             if cached.get("tool") == name and cached.get("arguments") == args:
                 self.memory[digest] = cached["response"]
@@ -100,7 +108,11 @@ class MCPReader:
                 result = await self.session.call_tool(name, args)
                 break
             except httpx.HTTPStatusError as exc:
-                if exc.response.status_code not in {429, 502, 503, 504} or attempt == 2:
+                if (
+                    name == "run_site_audit"
+                    or exc.response.status_code not in {429, 502, 503, 504}
+                    or attempt == 2
+                ):
                     raise ProviderError(
                         f"OpenSEO HTTP {exc.response.status_code}; check credentials, credits, and service availability"
                     ) from None
@@ -115,8 +127,9 @@ class MCPReader:
                 f"OpenSEO {name} returned no structured object; review server contract"
             )
         # Persist structured data only: never response headers, auth, or tool text.
-        save_json(path, {"tool": name, "arguments": args, "response": data})
-        self.memory[digest] = data
+        if cacheable:
+            save_json(path, {"tool": name, "arguments": args, "response": data})
+            self.memory[digest] = data
         return data
 
 
@@ -405,11 +418,16 @@ class OpenSEOProvider:
                     result.warnings.append(
                         f"Search Console {attr} unavailable; connect the correct property in OpenSEO and verify the requested dates."
                     )
+        if site.audit.enabled and not historical:
+            from .site_audit import collect_audit
+
+            result.audit = await collect_audit(reader, site)
         if (
             not result.metrics
             and result.keywords is None
             and result.queries is None
             and result.pages is None
+            and result.audit is None
         ):
             raise ProviderError(
                 "No usable OpenSEO data: check project access, GSC connection, date availability, and credits"

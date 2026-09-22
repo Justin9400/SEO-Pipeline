@@ -102,6 +102,14 @@ def customer_html(snapshot: Snapshot) -> str:
         summary=summary(snapshot),
         recommendations=sorted(snapshot.candidates, key=lambda c: (-c.score, c.id))[:5],
         seo_actions=SEO_ACTIONS,
+        audit_issues=sorted(
+            snapshot.collection.audit.issues if snapshot.collection.audit else [],
+            key=lambda i: (
+                {"critical": 0, "warning": 1, "info": 2}[i.severity],
+                i.url,
+                i.issue_type,
+            ),
+        ),
         css=folder.joinpath("report.css").read_text(encoding="utf-8"),
     )
 

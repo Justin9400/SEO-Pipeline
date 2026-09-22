@@ -16,17 +16,17 @@ Sources:
 The application uses the official Python MCP SDK's Streamable HTTP client at
 `https://app.openseo.so/mcp`. It initializes a session and discovers the live input
 schemas with `tools/list`, including pagination. Arguments are validated against
-the discovered schema before any paid call. Only three named research/read tools
-are allowed. There is no arbitrary tool execution, crawl, project mutation,
-website source access, website deployment, or provider report publishing.
+the discovered schema before any paid call. Only the three performance tools and the three audit tools listed below are
+allowed. Enabled production runs create an OpenSEO site audit; no website edits,
+website deployment, arbitrary tool execution, or provider report publishing occur.
 
 Create an API key in **OpenSEO Settings > API keys**. Put its value in
 `OPENSEO_ACCESS_TOKEN` or `OPENSEO_API_KEY`. The isolated `session_for` adapter sends
 `Authorization: Bearer <value>`. OAuth refresh is deliberately not implemented;
 an OAuth access token will stop working when it expires. API keys are the provider's
-documented option for unattended CI. No live credentials or API calls were used
-to validate this implementation; contract and transport behavior are tested with
-fake responses.
+documented option for unattended CI. Audit response shapes were checked against existing Edwardscapes audit status
+and issue responses on 2026-09-21. Automated contract and transport tests use fake
+responses and prohibit external network access.
 
 ## Tool mapping
 
@@ -92,3 +92,29 @@ Raw caches and snapshots can contain commercially sensitive SEO data. Keep them
 in private storage, outside Git. Delete a site's dated raw-cache directory to
 force fresh collection; doing so may incur new provider charges. Do not run two
 writers for the same site/period concurrently.
+
+## Technical audits
+
+When `site.audit.enabled` is true, each non-historical production collection calls
+`run_site_audit` with the configured HTTPS domain, `maxPages`, and
+`runLighthouse: false`. It retains the returned audit ID and uses that exact ID
+for `get_audit_status` and `get_audit_issues`. It never uses an unrelated latest
+audit. Historical Search Console backfills and mock runs never start audits.
+
+The entire audit operation is bounded by `timeout_seconds` (default 900). Status
+is polled every ten seconds. Audit calls bypass both memory and disk caches;
+start requests are not automatically retried, including on HTTP errors. If the
+response is lost, the audit may still exist in OpenSEO. Rerunning the pipeline
+starts another audit and consumes audit capacity; existing audits are not deleted.
+
+The PDF includes current crawl date, audit ID, status, page budget, pages crawled,
+issue count, affected URLs, evidence details, severity, and provider fixes.
+`get_audit_issues` returns up to 200 details without a pagination cursor; omitted
+rows are disclosed against the provider summary count. Reaching the page budget
+is disclosed as potentially incomplete coverage. Robots exclusions, blocked pages,
+and undiscovered URLs prevent any guarantee of whole-site coverage.
+
+Failed or timed-out audits produce a PDF with a visible status and return CLI
+exit code 1 so Actions reports the incomplete audit while still uploading the PDF.
+Other available performance metrics remain usable. The audit is a current crawl,
+even when the requested performance report is for an older month.

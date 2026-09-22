@@ -22,6 +22,12 @@ class Reporting(Model):
     comparison_period: Literal["previous_month"] = "previous_month"
 
 
+class AuditConfig(Model):
+    enabled: bool = False
+    max_pages: int = Field(default=100, ge=1, le=500)
+    timeout_seconds: int = Field(default=900, ge=30, le=1800)
+
+
 class Site(Model):
     id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,63}$")
     name: str = Field(min_length=1, max_length=150)
@@ -33,6 +39,7 @@ class Site(Model):
     competitors: list[str] = Field(default_factory=list)
     openseo_project_id: str | None = Field(default=None, min_length=1)
     gsc_enabled: bool = True
+    audit: AuditConfig = Field(default_factory=AuditConfig)
 
     @field_validator("domain")
     @classmethod

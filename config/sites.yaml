@@ -3,6 +3,10 @@ sites:
     name: Edwardscapes
     domain: edwardscapes.com
     enabled: true
+    audit:
+      enabled: true
+      max_pages: 100
+      timeout_seconds: 900
     search:
       country: US
       language: en

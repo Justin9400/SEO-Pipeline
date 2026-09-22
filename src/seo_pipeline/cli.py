@@ -30,7 +30,7 @@ class JSONFormatter(logging.Formatter):
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Read-only multi-site SEO reporting")
+    parser = argparse.ArgumentParser(description="Multi-site SEO reporting and audits")
     commands = parser.add_subparsers(dest="command", required=True)
     report = commands.add_parser("report")
     report.add_argument("--site", default="all")
@@ -127,6 +127,12 @@ def main(argv: list[str] | None = None) -> int:
             store.save(snapshot)
             atomic_text(folder / "seo-data.json", snapshot.model_dump_json(indent=2))
             write_reports(snapshot, folder)
+            if collected.audit and collected.audit.status != "completed":
+                failures += 1
+                LOG.error(
+                    "Technical audit incomplete; PDF includes its status",
+                    extra={"site": site.id},
+                )
             LOG.info("Reports generated", extra={"site": site.id})
         except ProviderError as exc:
             failures += 1

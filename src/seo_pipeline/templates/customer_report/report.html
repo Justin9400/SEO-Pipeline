@@ -44,4 +44,22 @@
 {% endfor %}
 <p class="muted">Review results in the next reporting period. Search performance alone cannot establish why a ranking changed; verify suspected issues before editing the site.</p>
 </section>
+{% set audit = s.collection.audit %}
+<section class="new-page"><h2>OpenSEO technical site audit</h2>
+{% if audit %}
+<p>Status: <strong>{{ audit.status }}</strong> | Observed {{ audit.observed_at.date() }}. This is a current crawl, not a historical audit of the reporting month.</p>
+<p>Pages crawled: {{ fmt(audit.pages_crawled) }} | Page budget: {{ audit.max_pages }} | Reported issues: {{ fmt(audit.total_issues) }} | Issues included: {{ audit.issues|length }}</p>
+{% if audit.audit_id %}<p class="muted">Audit ID: {{ audit.audit_id }}</p>{% endif %}
+<p class="muted">The crawl follows same-origin links and respects robots.txt. Undiscovered, excluded, blocked, or rate-limited pages may not be inspected. Lighthouse is not enabled. Findings and fixes below are supplied by OpenSEO; verify them before editing the site.</p>
+{% for warning in audit.warnings %}<p class="notice">{{ warning }}</p>{% endfor %}
+{% for issue in audit_issues %}
+<div class="audit-issue">
+<h3>{{ loop.index }}. {{ issue.title }} ({{ issue.severity }})</h3>
+<p class="url"><strong>Affected page:</strong> {{ issue.url }}</p>
+{% for key, value in issue.details.items() %}<p class="muted">{{ key }}: {{ value }}</p>{% endfor %}
+<p><strong>How to fix:</strong> {{ issue.how_to_fix }}</p>
+</div>
+{% else %}{% if audit.status == 'completed' and audit.total_issues == 0 %}<p>OpenSEO reported no issues within the crawled scope. This is not a guarantee that every page is free of SEO issues.</p>{% endif %}{% endfor %}
+{% else %}<p>No technical audit was run. Mock runs use synthetic performance data; production audits must be enabled in the site configuration.</p>{% endif %}
+</section>
 </body></html>

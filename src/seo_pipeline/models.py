@@ -34,7 +34,28 @@ class Row(Model):
     ctr: float | None = Field(default=None, ge=0, le=1)
 
 
+class AuditIssue(Model):
+    severity: Literal["critical", "warning", "info"]
+    issue_type: str
+    title: str
+    url: str
+    details: dict = Field(default_factory=dict)
+    how_to_fix: str
+
+
+class AuditResult(Model):
+    status: str = "unavailable"
+    audit_id: str | None = None
+    observed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    max_pages: int
+    pages_crawled: int | None = None
+    total_issues: int | None = None
+    issues: list[AuditIssue] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
 class Collection(Model):
+    audit: AuditResult | None = None
     metrics: dict[str, Metric] = Field(default_factory=dict)
     keywords: list[Row] | None = None
     queries: list[Row] | None = None

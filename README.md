@@ -201,15 +201,15 @@ that run's collected evidence, with the affected keyword/page, source metrics,
 and concrete next steps. Recommendations remain available without OpenAI analysis.
 When evidence is insufficient, the report says so instead of inventing findings.
 
-Only the PDF is uploaded. Snapshot JSON, Markdown, and raw provider responses
-remain on the temporary runner and are not uploaded as artifacts. Each Actions
+The PDF and completed OpenSEO audit issue JSON are uploaded separately. Snapshot
+JSON, Markdown, and other raw provider responses remain on the temporary runner. Each Actions
 run starts without saved snapshot history. The pipeline attempts to retrieve the
 previous month's Search Console data for comparisons; historical ranking and
 backlink comparisons are unavailable without retained snapshots. Local CLI runs
 can still keep history in their configured data directory.
 
 Existing artifacts from older runs are unchanged. Rerun the workflow to get the
-current PDF-only output.
+current PDF and audit JSON outputs.
 
 Artifacts expire after 90 days (or earlier if repository policy limits retention),
 so download backups. Any available PDF is still uploaded if report generation
@@ -287,3 +287,19 @@ OpenSEO audit capacity/account limits apply. Each production rerun starts a new
 audit; the pipeline does not automatically delete old audits. A failed or timed-out
 audit is clearly marked in the PDF and causes a nonzero exit status, while the
 workflow still uploads the available PDF. No archive passphrase is required.
+
+### Downloadable audit JSON
+
+Completed production audits also produce **audit-issues.json**, downloadable
+separately from the Actions run's Artifacts section without ZIP extraction or a
+password. It contains the original issue-row array returned by OpenSEO, preserving
+provider fields such as `severity`, `issueType`, `title`, `url`, `details`, and
+`howToFix`. The dashboard export may call `title` `issue`; provider keys are not
+renamed. No internal performance data or model analysis is included.
+
+The file contains the same retrieved issues used by the PDF (up to 200 rows).
+See the PDF for total issue count, audit ID, and coverage/truncation warnings.
+A completed audit with no issues exports `[]`. Failed, disabled, or mock audits
+produce no audit JSON, and a previous export in the same output folder is removed
+before collection. JSON is written before PDF rendering so it remains available
+if rendering fails. Local runs save it beside the PDF.

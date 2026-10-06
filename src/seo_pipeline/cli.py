@@ -12,7 +12,7 @@ from .periods import month_period
 from .providers import ProviderError
 from .providers.mock import MockProvider
 from .providers.openseo import OpenSEOProvider
-from .reports import write_reports
+from .reports import write_audit_json, write_reports
 from .storage import FileStore, atomic_text
 
 LOG = logging.getLogger("seo_pipeline")
@@ -80,6 +80,7 @@ def main(argv: list[str] | None = None) -> int:
     for site in sites:
         folder = args.output_dir / provider_name / site.domain / period.key
         try:
+            (folder / "audit-issues.json").unlink(missing_ok=True)
             collected = provider.collect(site, period)
             snapshot = Snapshot(
                 site=site, reporting_period=period, collection=collected
@@ -88,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             store.save(snapshot)
             folder.mkdir(parents=True, exist_ok=True)
             atomic_text(folder / "seo-data.json", snapshot.model_dump_json(indent=2))
+            write_audit_json(snapshot, folder)
             previous = store.load_previous(site, period)
             if previous is None and provider_name == "mock":
                 prior_period = month_period(period.previous_start.strftime("%Y-%m"))

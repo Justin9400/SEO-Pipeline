@@ -59,6 +59,7 @@ async def collect_audit(reader, site: Site) -> AuditResult:
             for row in raw["issues"]
         ]
         result.status = "completed"
+        result.raw_issues = raw["issues"]
         if (
             len(result.issues) < result.total_issues
             or len(result.issues) >= ISSUE_LIMIT

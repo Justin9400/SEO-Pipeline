@@ -278,6 +278,19 @@ def internal_markdown(s: Snapshot) -> str:
     return "\n".join(lines) + "\n"
 
 
+def write_audit_json(s: Snapshot, folder: Path) -> None:
+    """Export provider issue rows only, without internal analysis or snapshots."""
+    path = folder / "audit-issues.json"
+    audit = s.collection.audit
+    if audit and audit.status == "completed" and audit.raw_issues is not None:
+        atomic_text(
+            path,
+            json.dumps(audit.raw_issues, indent=2, ensure_ascii=False, allow_nan=False),
+        )
+    else:
+        path.unlink(missing_ok=True)
+
+
 def write_reports(s: Snapshot, folder: Path) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     atomic_text(folder / "seo-opportunities.md", internal_markdown(s))

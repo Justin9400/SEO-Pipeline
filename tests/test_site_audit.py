@@ -210,3 +210,28 @@ def test_wrong_audit_id_rejected():
     audit = asyncio.run(collect_audit(reader, site()))
     assert audit.status == "unavailable" and not audit.issues
     assert len(reader.calls) == 2
+
+
+def test_audit_json_preserves_provider_rows_and_removes_stale(tmp_path):
+    import json
+
+    from seo_pipeline.reports import write_audit_json
+
+    audit = asyncio.run(collect_audit(Reader(), site()))
+    snapshot = Snapshot(
+        site=site(),
+        reporting_period=month_period("2026-07"),
+        collection=Collection(provider="openseo", audit=audit),
+    )
+    write_audit_json(snapshot, tmp_path)
+    path = tmp_path / "audit-issues.json"
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    assert rows == audit.raw_issues
+    assert rows[0]["howToFix"] == "Update the broken link <script>unsafe</script>."
+    assert rows[0]["details"] == {"targetStatus": 404}
+    audit.raw_issues = []
+    write_audit_json(snapshot, tmp_path)
+    assert json.loads(path.read_text()) == []
+    audit.status = "failed"
+    write_audit_json(snapshot, tmp_path)
+    assert not path.exists()

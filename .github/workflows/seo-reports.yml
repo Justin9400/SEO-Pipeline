@@ -82,6 +82,15 @@ jobs:
           retention-days: 90
           if-no-files-found: warn
 
+      - name: Save OpenSEO audit JSON
+        if: ${{ always() && (steps.reports.outcome == 'success' || steps.reports.outcome == 'failure') }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: output/**/audit-issues.json
+          archive: false
+          retention-days: 90
+          if-no-files-found: ignore
+
       - name: Clean up runner files
         if: always()
         run: |

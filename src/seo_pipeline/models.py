@@ -44,6 +44,7 @@ class AuditIssue(Model):
 
 
 class AuditResult(Model):
+    raw_issues: list[dict] | None = None
     status: str = "unavailable"
     audit_id: str | None = None
     observed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
